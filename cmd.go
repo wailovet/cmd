@@ -62,8 +62,9 @@ type Cmd struct {
 	Args   []string
 	Env    []string
 	Dir    string
-	Stdout chan string // streaming STDOUT if enabled, else nil (see Options)
-	Stderr chan string // streaming STDERR if enabled, else nil (see Options)
+	Stdout chan string   // streaming STDOUT if enabled, else nil (see Options)
+	Stderr chan string   // streaming STDERR if enabled, else nil (see Options)
+	Stdin  *bytes.Buffer // streaming STDERR if enabled, else nil (see Options)
 	*sync.Mutex
 	started    bool          // cmd.Start called, no error
 	stopped    bool          // Stop called
@@ -273,7 +274,7 @@ func (c *Cmd) run() {
 	// Setup command
 	// //////////////////////////////////////////////////////////////////////
 	cmd := exec.Command(c.Name, c.Args...)
-
+	cmd.Stdin = c.Stdin
 	// Set process group ID so the cmd and all its children become a new
 	// process group. This allows Stop to SIGTERM the cmd's process group
 	// without killing this process (i.e. this code here).
